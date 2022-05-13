@@ -1,9 +1,19 @@
 package com.master.demo.ui.response.models;
 
 public class UserResponseModel {
+	private String userID;
+	
 	private String username;
 	private String firstName;
 	private String lastName;
+
+	public String getUserID() {
+		return userID;
+	}
+
+	public void setUserID(String userID) {
+		this.userID = userID;
+	}
 	public String getUsername() {
 		return username;
 	}

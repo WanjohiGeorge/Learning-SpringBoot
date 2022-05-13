@@ -3,6 +3,7 @@ package com.master.demo.ui.controller;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,10 +21,13 @@ public class UserController {
 	@Autowired
 	UserServiceImpl userService;
 	
-	@GetMapping
-	public UserResponseModel getUser(@RequestBody UserRequestModel userRequestModel) {		
+	@GetMapping(path="/{id}")
+	public UserResponseModel getUser(@PathVariable String id) {		
 		UserResponseModel returnValue =new UserResponseModel();
-		BeanUtils.copyProperties(userRequestModel, returnValue);
+		
+		UserDTO userDto = userService.getUserByUserId(id);
+	
+		BeanUtils.copyProperties(userDto, returnValue);
 		return returnValue;
 	}
 	

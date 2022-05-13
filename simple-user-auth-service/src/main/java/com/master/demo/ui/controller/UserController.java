@@ -1,7 +1,11 @@
 package com.master.demo.ui.controller;
 
+
+import javax.print.attribute.standard.Media;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +25,7 @@ public class UserController {
 	@Autowired
 	UserServiceImpl userService;
 	
-	@GetMapping(path="/{id}")
+	@GetMapping(path="/{id}", produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
 	public UserResponseModel getUser(@PathVariable String id) {		
 		UserResponseModel returnValue =new UserResponseModel();
 		

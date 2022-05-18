@@ -28,8 +28,8 @@ public class AppExceptionHandler {
 		return new ResponseEntity<>(errorMessage, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	@ExceptionHandler(value = RuntimeException.class)
-	public ResponseEntity<Object> handleUserServiceExceptions(RuntimeException ex, WebRequest req) {
+	@ExceptionHandler(value = Exception.class)
+	public ResponseEntity<Object> handleExceptions(Exception ex, WebRequest req) {
 //		use custom error message
 
 		ErrorMessage errorMessage = new ErrorMessage(new Date(), ex.getMessage());

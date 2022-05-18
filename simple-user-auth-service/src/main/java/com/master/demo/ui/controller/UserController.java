@@ -1,8 +1,6 @@
 package com.master.demo.ui.controller;
 
 
-import javax.print.attribute.standard.Media;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -13,13 +11,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.master.demo.exceptions.ErrorMessages;
+import com.master.demo.exceptions.UserServiceExceptions;
 import com.master.demo.shared.dto.UserDTO;
 import com.master.demo.ui.request.models.UserRequestModel;
 import com.master.demo.ui.response.models.UserResponseModel;
 import com.master.demo.ui.service.impl.UserServiceImpl;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/users")
 
 public class UserController {
 	@Autowired
@@ -35,10 +35,12 @@ public class UserController {
 		return returnValue;
 	}
 	
-	@PostMapping
-	public UserResponseModel setUser(@RequestBody UserRequestModel userRequestModel) {		
+	@PostMapping(consumes={ MediaType.APPLICATION_JSON_VALUE})
+	public UserResponseModel setUser(@RequestBody UserRequestModel userRequestModel) throws Exception {		
 		UserResponseModel returnValue =new UserResponseModel();
 		
+		if (userRequestModel.getEmail()==null || userRequestModel.getEmail().isEmpty() ) 
+			throw new UserServiceExceptions (ErrorMessages.MISSING_REQUIRED_FIELDS.getErrorMessage());
 		UserDTO userDTO =  new UserDTO();
 		BeanUtils.copyProperties(userRequestModel, userDTO);
 		

@@ -4,10 +4,9 @@ import java.util.Random;
 
 public class Utilities {
 
-	private static int length = 50;
 	private static final String ALPHABETS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-	public String GenerateUserID() {
+	public String generateId(int length) {
 		return generateRandomString(length);
 	}
 

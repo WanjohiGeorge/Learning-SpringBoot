@@ -1,5 +1,8 @@
 package com.master.demo.shared.dto;
 
+import java.util.List;
+
+
 public class UserDTO {
 
 	private String firstName;
@@ -8,8 +11,16 @@ public class UserDTO {
 	private String email;
 	private String password;
 	private String encPassword;
-	private String userID;
+	private String userID;	
+	private List<AddressDTO> addresses;	
+	
+	public List<AddressDTO> getAddresses() {
+		return addresses;
+	}
 
+	public void setAddresses(List<AddressDTO> addresses) {
+		this.addresses = addresses;
+	}
 	public String getEncPassword() {
 		return encPassword;
 	}

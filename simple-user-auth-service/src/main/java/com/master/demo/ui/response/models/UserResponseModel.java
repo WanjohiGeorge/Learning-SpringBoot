@@ -1,12 +1,15 @@
 package com.master.demo.ui.response.models;
 
+import java.util.List;
+
 public class UserResponseModel {
 	private String userID;
 	
 	private String username;
 	private String firstName;
-	private String lastName;
-
+	private String lastName;	
+	private List<AddressResponseModel> addresses;
+ 
 	public String getUserID() {
 		return userID;
 	}
@@ -31,5 +34,13 @@ public class UserResponseModel {
 	}
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+
+	public List<AddressResponseModel> getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(List<AddressResponseModel> addresses) {
+		this.addresses = addresses;
 	}
 }

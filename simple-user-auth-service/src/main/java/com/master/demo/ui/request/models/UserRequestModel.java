@@ -1,11 +1,15 @@
 package com.master.demo.ui.request.models;
 
+import java.util.List;
+
 public class UserRequestModel {
 	private String username;
 	private String password;
 	private String firstName;
 	private String lastName;
 	private String email;
+	
+	private List<AddressRequestModel> addresses;
 
 	public String getEmail() {
 		return email;
@@ -45,6 +49,14 @@ public class UserRequestModel {
 
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+
+	public List<AddressRequestModel> getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(List<AddressRequestModel> addresses) {
+		this.addresses = addresses;
 	}
 
 }

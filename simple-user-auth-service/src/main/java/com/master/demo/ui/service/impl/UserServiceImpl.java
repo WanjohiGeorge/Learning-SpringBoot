@@ -1,8 +1,10 @@
 package com.master.demo.ui.service.impl;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
+import org.hibernate.id.insert.InsertGeneratedIdentifierDelegate;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.master.demo.exceptions.UserServiceExceptions;
 import com.master.demo.io.entities.UserEntity;
 import com.master.demo.io.repositories.UserRepository;
+import com.master.demo.shared.dto.AddressDTO;
 import com.master.demo.shared.dto.UserDTO;
 import com.master.demo.ui.service.UserService;
 import com.master.demo.utils.Utilities;
@@ -34,25 +37,30 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserDTO createUser(UserDTO user) {
-		UserEntity userEntity = new UserEntity();
-
-		BeanUtils.copyProperties(user, userEntity);
 
 //		check if user exists before trying to save then again
-		UserEntity userXEntity = userRepository.findByEmail(user.getEmail());
-		if (userXEntity != null)
+
+		if (userRepository.findByEmail(user.getEmail()) != null)
 			throw new RuntimeException("User with email " + user.getEmail() + " already Exists");
 
+//		update addresses with Id
+
+		for (int i = 0; i < user.getAddresses().size(); i++) {
+			AddressDTO address = user.getAddresses().get(i);
+			address.setAddressId(utils.generateId(30));
+			address.setUserDetails(user);
+			user.getAddresses().set(i, address);
+		}
+		ModelMapper mapper = new ModelMapper();
+		UserEntity userEntity = mapper.map(user, UserEntity.class);
+
 //		generate a new UserID;
-		userEntity.setUserID(utils.GenerateUserID());
+		userEntity.setUserID(utils.generateId(50));
 		userEntity.setEncPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
 		UserEntity savedUser = userRepository.save(userEntity);
-
-		UserDTO returnV = new UserDTO();
-		BeanUtils.copyProperties(savedUser, returnV);
-
-		return returnV;
+		UserDTO r = mapper.map(savedUser, UserDTO.class);
+		return r;
 	}
 
 	@Override
@@ -77,11 +85,13 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDTO getUserByUserId(String userId) {
 		UserEntity userEntity = userRepository.findByUserID(userId);
-		UserDTO userDTO = new UserDTO();
-		if (userEntity != null)
-			BeanUtils.copyProperties(userEntity, userDTO);
 
-		return userDTO;
+		ModelMapper mapper = new ModelMapper();
+
+		if (userEntity != null)
+			return mapper.map(userEntity, UserDTO.class);
+		else
+			return null;
 	}
 
 	@Override
@@ -95,7 +105,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<UserDTO> getUsers(int page, int limit) {
-		if (page > 0) page-=1;
+		if (page > 0)
+			page -= 1;
 
 		List<UserDTO> returnValue = new ArrayList<>();
 		// create a pageable request that returns pages
@@ -104,9 +115,9 @@ public class UserServiceImpl implements UserService {
 		Page<UserEntity> userPages = userRepository.findAll(pageableRequest);
 		// get a list of entities from the pages
 		List<UserEntity> users = userPages.getContent();
-		
-		for (UserEntity user: users) {
-			UserDTO uDTO =  new UserDTO();
+
+		for (UserEntity user : users) {
+			UserDTO uDTO = new UserDTO();
 			BeanUtils.copyProperties(user, uDTO);
 			returnValue.add(uDTO);
 		}

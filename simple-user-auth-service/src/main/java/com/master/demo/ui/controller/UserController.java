@@ -1,12 +1,17 @@
 package com.master.demo.ui.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,28 +44,64 @@ public class UserController {
 	AddressServiceImpl addressService;
 
 	@GetMapping(path = "/{id}", produces = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-	public UserResponseModel getUser(@PathVariable String id) {
+	public EntityModel<UserResponseModel> getUser(@PathVariable String id) {
 		ModelMapper mapper = new ModelMapper();
-		return mapper.map(userService.getUserByUserId(id), UserResponseModel.class);
+		Link userAddressesLinks= WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserAddresses(id)).withRel("addresses");
+		Link selfLink =  WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUser(id)).withSelfRel();
+		
+		return EntityModel.of( mapper.map(userService.getUserByUserId(id), UserResponseModel.class), Arrays.asList(selfLink,userAddressesLinks));
 	}
 
 	@GetMapping(path = "/{id}/addresses", produces = { MediaType.APPLICATION_XML_VALUE,
 			MediaType.APPLICATION_JSON_VALUE })
-	public List<AddressResponseModel> getUserAddresses(@PathVariable String id) {				
+	public CollectionModel<AddressResponseModel> getUserAddresses(@PathVariable String id) {
+
 		List<AddressResponseModel> response = new ArrayList<>();
-		List <AddressDTO> dto = addressService.getAddresses(id);
-		if (dto != null && !dto.isEmpty()){
-			java.lang.reflect.Type listType = new TypeToken<List<AddressResponseModel>>() {}.getType();
-			response =  new ModelMapper().map(dto, listType);
+		List<AddressDTO> dto = addressService.getAddresses(id);
+		if (dto != null && !dto.isEmpty()) {
+			java.lang.reflect.Type listType = new TypeToken<List<AddressResponseModel>>() {
+			}.getType();
+			response = new ModelMapper().map(dto, listType);
+			
+			for (AddressResponseModel addressR : response) {
+				Link selfLink = WebMvcLinkBuilder
+						.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserAddress(id, addressR.getAddressId()))
+						.withSelfRel();
+				addressR.add(selfLink);
+			}
 		}
-		return response;	
+
+		Link userAddressesLinks= WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserAddresses(id)).withRel("addresses");
+		Link selfLink =  WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUser(id)).withSelfRel();
+		return CollectionModel.of(response, userAddressesLinks, selfLink);
 	}
 
 	@GetMapping(path = "/{id}/addresses/{addressId}", produces = { MediaType.APPLICATION_XML_VALUE,
 			MediaType.APPLICATION_JSON_VALUE })
-	public AddressResponseModel getUserAddress(@PathVariable String addressId) {		
-		return new ModelMapper().map(addressService.getAddress(addressId),AddressResponseModel.class);
+	public EntityModel<AddressResponseModel> getUserAddress(@PathVariable String id, @PathVariable String addressId) {
+
+//		using mappings 
+
+		Link userLink = WebMvcLinkBuilder.linkTo(UserController.class).slash(id).withRel("user");
+		Link userAddressLink = WebMvcLinkBuilder
+				.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserAddresses(id))
+//				slash(id).
+//				slash("user").
+//				slash("addresses")
+				.withRel("addresses");
+		Link selfLink = WebMvcLinkBuilder
+				.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserAddress(id, addressId))
+				
+				// .slash(id).slash("user").slash("addresses").slash(addressId).
+				.withSelfRel();
+
+		AddressResponseModel r = new ModelMapper().map(addressService.getAddress(addressId),
+				AddressResponseModel.class);
+//		use EntityModel to return the object with the links.
+		return EntityModel.of(r, Arrays.asList(userLink, userAddressLink, selfLink));
+
 	}
+
 	@PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE })
 	public UserResponseModel setUser(@RequestBody UserRequestModel userRequestModel) throws Exception {
 

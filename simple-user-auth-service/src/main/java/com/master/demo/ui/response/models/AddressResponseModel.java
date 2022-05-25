@@ -1,6 +1,8 @@
 package com.master.demo.ui.response.models;
 
-public class AddressResponseModel {
+import org.springframework.hateoas.RepresentationModel;
+
+public class AddressResponseModel extends RepresentationModel<AddressResponseModel> {
 	private String addressId;
 	private String city;
 	private String country;
